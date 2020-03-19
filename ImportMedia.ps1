@@ -92,6 +92,9 @@ function getImageMetaData($imgFile)
 	$imageObj["MONTH"] = $null
 	$imageObj["LAT"] = $null
 	$imageObj["LON"] = $null
+	$imageObj["COUNTRY"] = $null
+	$imageObj["CITY"] = $null
+	$imageObj["STATE"] = $null
 
 	#<#
 	try
