@@ -130,7 +130,6 @@ function getImageMetaData($imgFile)
 		$dt = $(Get-MetaDesc -dirObj $exifSubDir -tagName 'Date/Time Original')
 		if($dt)
 		{
-			#write-host $dt
 			$imageObj["DATETAKEN"] = [datetime]::ParseExact($dt,"yyyy:MM:dd HH:mm:ss", $null)
 		}
 	
@@ -192,7 +191,6 @@ function ProcessScannedData($scanOutput, $CleanMediaPath, $OrganizeBy)
 				$MediaHashes += $fileRec.HASH
 			}
 		}
-		#write-host $MediaHashes
 	}
 	
 	for($i=0; $i -lt $files.count; $i++)
@@ -201,8 +199,6 @@ function ProcessScannedData($scanOutput, $CleanMediaPath, $OrganizeBy)
 		
 		if($MediaHashes.contains($filerecord.HASH))
 		{
-			#LogToFile -str_lg_file $logPath -logstring "Skipping file : $($filerecord.PATH)"
-			
 			$global:skippedFiles += $filerecord.PATH
 			$lSize = (get-item -path $filerecord.PATH).length
 			$global:SavedSpace += $lSize
@@ -235,8 +231,6 @@ function ProcessScannedData($scanOutput, $CleanMediaPath, $OrganizeBy)
 	
 	Write-Progress -ID 1 -Completed -Activity "done" -PercentComplete 100
 
-	
-	
 	$ManagedFiles | Export-csv -Path $ManagedMediaPath -Encoding "UTF8" -NoTypeInformation -Force
 
 }
@@ -244,7 +238,6 @@ function ProcessScannedData($scanOutput, $CleanMediaPath, $OrganizeBy)
 function ReplaceVariables($strVal, $filerecord)
 {
     $filerecord | Get-Member -MemberType *Property | % {
-        #$output.($_.name) = $psCustomObject.($_.name); 
 		$key = $_.name
 		$val = $filerecord.($_.name)
 		
@@ -303,14 +296,11 @@ Add-Type -Path "$PSScriptRoot/bin/XmpCore.dll"
 
 $logPath = "$PSScriptRoot\scan.log"
 $scanRoot = Select-FolderBrowse -prompt "Select source folder to Import" -PathSuggestion "C:\backup\Pictures\"
-#$scanRoot = "C:\backup\Pictures\Blore"
 
 $scanOutput = $PSScriptRoot + "\scanoutput.csv"
 
-
-#$scanRoot = "D:\Pictures\Year 2012\Annie Bday 2012"
 $OrganizeBy = "{YEAR}\{MONTH}\{MAKE}\{FOLDER}"
-$CleanMediaPath = "D:\MediaManager\media"
+$CleanMediaPath = "$PSScriptRoot\ManagedMedia"
 
 $global:skippedFiles =@()
 $global:SavedSpace =0
@@ -322,8 +312,7 @@ LogToFile -str_lg_file $logPath -logstring "Scanning folder $scanRoot" -banner $
 
 ScanFolder -Path $scanRoot -ScanOutput $scanOutput
 
-#getImageMetaData -imgFile $(get-item -path "D:\Pictures\Year 2012\test.txt")
-#getImageMetaData -imgFile $(get-item -path "D:\Pictures\Iphone5s\IMG_2844.JPG")
+LogToFile -str_lg_file $logPath -logstring "Importing to $CleanMediaPath"
 
 ProcessScannedData -scanOutput $scanOutput -CleanMediaPath $CleanMediaPath -OrganizeBy $OrganizeBy
 
@@ -334,7 +323,6 @@ foreach($skpFile in $global:skippedFiles)
 }
 
 LogToFile -str_lg_file $logPath -logstring "Imported $($global:ImportCount) files. Skipped $($global:skippedFiles.count) Duplicates. Saved $(Get-FiendlySize -size $global:SavedSpace)" -banner $true
-
 
 $sw.Stop()
 
