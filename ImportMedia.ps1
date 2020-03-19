@@ -67,7 +67,7 @@ function ScanFolder($Path,$ScanOutput)
 			$global:skippedFiles += $file.FullName
 		}
 		
-		Write-Progress -Activity "Metadata extrction. $i of $($files.count) : $($file.name)" -ID 1 -PercentComplete $(($i * 100)/$files.count)
+		Write-Progress -Activity "Extracting Metadata. $i of $($files.count) : $($file.name)" -ID 1 -PercentComplete $(($i * 100)/$files.count)
 	}
 	
 	Write-Progress -ID 1 -Completed -Activity "done" -PercentComplete 100
@@ -322,7 +322,7 @@ foreach($skpFile in $global:skippedFiles)
 	LogToFile -str_lg_file $logPath -logstring "Skipped File : $skpFile" -display $false
 }
 
-LogToFile -str_lg_file $logPath -logstring "Imported $($global:ImportCount) files. Skipped $($global:skippedFiles.count) Duplicates. Saved $(Get-FiendlySize -size $global:SavedSpace)" -banner $true
+LogToFile -str_lg_file $logPath -logstring "Imported $($global:ImportCount) files. Skipped $($global:skippedFiles.count) Duplicates/Unwanted files. Saved $(Get-FiendlySize -size $global:SavedSpace)" -banner $true
 
 $sw.Stop()
 
