@@ -1,10 +1,10 @@
 # MediaOrganizer
- If you want to consolidate all all the picutres you have taken over years and organize them by Year/ Month etc you can use this script.
+If you want to consolidate all the picutres and vidoes you have taken over years that are spread across many old hard drives you can use this script to consolidate and organize them by Year/ Month etc.
  
 
 Steps to use the script are 
 
-1) Put this script in an external hard drive where you want to consolidate your picture 
+1) Put this script in an external hard drive. This will also be the place where you will consolidate your pictures and videos. Make sure that the drive is fast enough and has enough free disk space.
 2) run the Import.cmd file.
 3) Select the folder you want to import.
 
@@ -17,6 +17,8 @@ You can run the script for each of your sources and over time have a clean organ
 The folder organization can be any updated to suite your taste. Variables available MAKE,MODEL,YEAR,MONTH. I intend to add COUNTRY, STATE and CITY at some point and I am looking for a free geocoding service for this. google service requires an API key. 
 
 If you know of any free geocoding service please let me know.
+
+Please note that metadata generated is saved in /ManagedMedia/ManagedMedia.csv . Please dont delete this file as this is used for de duplication. Also dont add or change files manually under /ManagedMedia  and you should consider them as read only copy organized and managed by this script.
 
 Thank you!
 
