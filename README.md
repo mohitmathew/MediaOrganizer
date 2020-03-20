@@ -1,7 +1,6 @@
 # MediaOrganizer
 If you want to consolidate all the picutres and vidoes you have taken over years that are spread across many old hard drives you can use this script to consolidate and organize them by Year/ Month etc.
  
-
 Steps to use the script are 
 
 1) Put this script in an external hard drive. This will also be the place where you will consolidate your pictures and videos. Make sure that the drive is fast enough and has enough free disk space.
@@ -18,7 +17,13 @@ The folder organization can be any updated to suite your taste. Variables availa
 
 If you know of any free geocoding service please let me know.
 
+Default folder organization is {YEAR}\{MONTH}\{FOLDER} and can be overridden by creating a setting.xml in the root folder.
+example : <Setting OrganizeBy="{YEAR}\{MONTH}\{FOLDER}" ></Setting>
+
+
 Please note that metadata generated is saved in /ManagedMedia/ManagedMedia.csv . Please dont delete this file as this is used for de duplication. Also dont add or change files manually under /ManagedMedia  and you should consider them as read only copy organized and managed by this script.
+
+if after importing the data you decide to reorganize the folder structure update the setting xml and run ReorgMedia.cmd
 
 Thank you!
 

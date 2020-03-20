@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-#.$PSScriptRoot\..\CommonFunctions.ps1
+.$PSScriptRoot\common.ps1
 
 <#
 References
@@ -8,43 +8,14 @@ https://www.nuget.org/packages/MetadataExtractor/2.3.0
 https://www.nuget.org/packages/XmpCore/
 #>
 
-Function LogToFile
-{
-   Param ([string]$str_lg_file, [string]$logstring, [bool]$display = $true, [bool] $banner = $false )
-
-	
-   if($banner)
-   {
-		$bnrstr =  "`n============================================================================="
-		write-host $bnrstr
-		Add-content $str_lg_file -value $bnrstr -Encoding Unicode
-   }
-   
-   $logstring = (Get-Date -format "yyyy/MM/dd HH:mm:ss") + " :: " + $logstring
-   if($display)
-   {
-        Write-Host  $logstring
-   }
-
-   Add-content $str_lg_file -value $logstring -Encoding Unicode
-   
-   if($banner)
-   {
-		$bnrstr =  "============================================================================="
-		write-host $bnrstr
-		Add-content $str_lg_file -value $bnrstr -Encoding Unicode
-   }
-
-}
-
 function Get-MetaDir($metaDirs, $name) {
     $metaDirs | Where-Object { $_.Name -eq $name } | Select-Object -first 1
 }
  
-
-
 function ScanFolder($Path,$ScanOutput)
 {
+	LogToFile -str_lg_file $logPath -logstring "Discovering video and images please wait..."
+
 	$files = get-childItem -path $Path -recurse -include ('*.jpg', '*.mov','*.jpeg','*.bmp','*.mp4','*.avi','*.wav','*.mpg','*.3gp') -Attributes !Directory+!System
 	
 	LogToFile -str_lg_file $logPath -logstring "$($files.count) files found. "
@@ -165,27 +136,18 @@ function Get-MetaDesc($dirObj, $tagName)
 	return $Val
 }
 
-function clonePSObject($obj)
-{
-	$objnew = New-Object PsObject
-	$obj.psobject.properties | % {
-		$objnew | Add-Member -MemberType $_.MemberType -Name $_.Name -Value $_.Value
-	}
-	return $objnew
-}
-
 function ProcessScannedData($scanOutput, $CleanMediaPath, $OrganizeBy)
 {
-	$ManagedMediaPath = "$CleanMediaPath\ManagedMedia.csv"
+	$ManagedMediaMetadata = "$CleanMediaPath\ManagedMedia.csv"
 	
 	$files = import-csv -path $scanOutput -Encoding "UTF8"
 	
 	$MediaHashes = @()
 	$ManagedFiles = @()
 	
-	if(test-Path -path $ManagedMediaPath)
+	if(test-Path -path $ManagedMediaMetadata)
 	{
-		$ManagedFiles = import-csv -path $ManagedMediaPath -Encoding "UTF8"
+		$ManagedFiles = import-csv -path $ManagedMediaMetadata -Encoding "UTF8"
 		
 		foreach($fileRec in $ManagedFiles)
 		{
@@ -234,61 +196,7 @@ function ProcessScannedData($scanOutput, $CleanMediaPath, $OrganizeBy)
 	
 	Write-Progress -ID 1 -Completed -Activity "done" -PercentComplete 100
 
-	$ManagedFiles | Export-csv -Path $ManagedMediaPath -Encoding "UTF8" -NoTypeInformation -Force
-
-}
-
-function ReplaceVariables($strVal, $filerecord)
-{
-    $filerecord | Get-Member -MemberType *Property | % {
-		$key = $_.name
-		$val = $filerecord.($_.name)
-		
-		if (([string]::IsNullOrEmpty($val)))
-		{
-			$val = "Unknown"
-		}
-		$val = $val.trim()
-		
-		$strVal = $strVal.replace('{' + $key  + '}', $val)
-    }
-	
-	return $strVal
-}
-
-Function Select-FolderBrowse([string] $prompt, [string] $PathSuggestion = "")
-{
-    [System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null
-
-    write-host "$prompt : " -NoNewline
-
-    $FolderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
-    $FolderBrowser.Description = $prompt
-    if($PathSuggestion -ne "")
-    {
-        $FolderBrowser.SelectedPath = $PathSuggestion
-    }
-
-    $retval  = $FolderBrowser.ShowDialog()
-
-    If($retval -ne "OK")
-    {
-        throw "Folder not selected!!!"        
-    }
-
-    write-host $FolderBrowser.SelectedPath
-
-    return $FolderBrowser.SelectedPath   
-}
-
-function Get-FiendlySize($size)
-{
-    If     ($size -gt 1TB) {return [string]::Format("{0:0.00} TB", $size / 1TB)}
-    ElseIf ($size -gt 1GB) {return [string]::Format("{0:0.00} GB", $size / 1GB)}
-    ElseIf ($size -gt 1MB) {return [string]::Format("{0:0.00} MB", $size / 1MB)}
-    ElseIf ($size -gt 1KB) {return [string]::Format("{0:0.00} kB", $size / 1KB)}
-    ElseIf ($size -ge 0)   {return [string]::Format("{0:0.00} B", $size)}
-    Else                   {return ""}
+	$ManagedFiles | Export-csv -Path $ManagedMediaMetadata -Encoding "UTF8" -NoTypeInformation -Force
 
 }
 
@@ -302,8 +210,12 @@ $scanRoot = Select-FolderBrowse -prompt "Select source folder to Import" -PathSu
 
 $scanOutput = $PSScriptRoot + "\scanoutput.csv"
 
-$OrganizeBy = "{YEAR}\{MONTH}\{MAKE}\{FOLDER}"
+
 $CleanMediaPath = "$PSScriptRoot\ManagedMedia"
+$SettingFile = "$PSScriptRoot\setting.xml"
+
+$OrganizeBy = getSettingValue -SettingFile $SettingFile -Name "OrganizeBy"
+
 
 $global:skippedFiles =@()
 $global:SavedSpace =0
@@ -315,7 +227,7 @@ LogToFile -str_lg_file $logPath -logstring "Scanning folder $scanRoot" -banner $
 
 ScanFolder -Path $scanRoot -ScanOutput $scanOutput
 
-LogToFile -str_lg_file $logPath -logstring "Importing to $CleanMediaPath"
+LogToFile -str_lg_file $logPath -logstring "Importing to $CleanMediaPath and organizing by $OrganizeBy"
 
 ProcessScannedData -scanOutput $scanOutput -CleanMediaPath $CleanMediaPath -OrganizeBy $OrganizeBy
 
