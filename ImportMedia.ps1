@@ -16,7 +16,7 @@ function ScanFolder($Path,$ScanOutput)
 {
 	LogToFile -str_lg_file $logPath -logstring "Discovering video and images please wait..."
 
-	$files = get-childItem -path $Path -recurse -include ('*.jpg', '*.mov','*.jpeg','*.bmp','*.mp4','*.avi','*.wav','*.mpg','*.3gp') -Attributes !Directory+!System
+	$files = get-childItem -path $Path -recurse -include ('*.jpg', '*.mov','*.jpeg','*.bmp','*.mp4','*.avi','*.wav','*.mpg','*.3gp', '*.heic','*.png') -Attributes !Directory+!System
 	
 	LogToFile -str_lg_file $logPath -logstring "$($files.count) files found. "
 	
@@ -204,6 +204,8 @@ function ProcessScannedData($scanOutput, $CleanMediaPath, $OrganizeBy)
 cls
 Add-Type -Path "$PSScriptRoot/bin/MetadataExtractor.dll"
 Add-Type -Path "$PSScriptRoot/bin/XmpCore.dll"
+
+#getImageMetaData -imgFile (get-item "D:\iphone7\IMG_1353.JPG")
 
 $logPath = "$PSScriptRoot\scan.log"
 $scanRoot = Select-FolderBrowse -prompt "Select source folder to Import" -PathSuggestion "C:\backup\Pictures\"
