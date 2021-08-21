@@ -205,17 +205,29 @@ cls
 Add-Type -Path "$PSScriptRoot/bin/MetadataExtractor.dll"
 Add-Type -Path "$PSScriptRoot/bin/XmpCore.dll"
 
-#getImageMetaData -imgFile (get-item "D:\iphone7\IMG_1353.JPG")
 
-$logPath = "$PSScriptRoot\scan.log"
-$scanRoot = Select-FolderBrowse -prompt "Select source folder to Import" -PathSuggestion "C:\backup\Pictures\"
+$CleanMediaPath = "$PSScriptRoot/ManagedMedia"
 
-$scanOutput = $PSScriptRoot + "\scanoutput.csv"
+$logPath = "$CleanMediaPath/scan.log"
 
+$scanRoot = Read-Host -Prompt "Enter folder path of the media to import" 
 
-$CleanMediaPath = "$PSScriptRoot\ManagedMedia"
-$SettingFile = "$PSScriptRoot\setting.xml"
+Write-Host $scanRoot
 
+if(-not (Test-Path -Path $scanRoot))
+{
+	throw "folder $scanRoot does not exist!"	
+}
+
+#$scanRoot = "/Volumes/MohitData/AnnieIPhonePics"
+
+if(-not (Test-Path -Path $CleanMediaPath))
+{
+	New-Item -Path $CleanMediaPath -ItemType "Directory" | Out-Null
+}
+
+$scanOutput = $CleanMediaPath + "/scanoutput.csv"
+$SettingFile = "$PSScriptRoot/setting.xml"
 $OrganizeBy = getSettingValue -SettingFile $SettingFile -Name "OrganizeBy"
 
 
